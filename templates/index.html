@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapDev – The Developer Command & Learning Hub</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <nav class="topbar">
+    <div class="container topbar-inner">
+      <a href="{{ url_for('index') }}" class="logo">
+        <div class="logo-mark">⚡</div>
+        SnapDev
+      </a>
+      <div class="nav-pills">
+        <a href="{{ url_for('linux') }}"      class="nav-pill">Linux</a>
+        <a href="{{ url_for('git') }}"        class="nav-pill">Git</a>
+        <a href="{{ url_for('docker') }}"     class="nav-pill">Docker</a>
+        <a href="{{ url_for('python') }}"     class="nav-pill">Python</a>
+        <a href="{{ url_for('flask_tips') }}" class="nav-pill">Flask</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="container hero-inner">
+      <div class="hero-badge"><span class="badge-dot"></span>v1.0 · Open Reference · 100 Commands</div>
+      <h1 class="hero-title"><span class="snap">Snap</span><span class="dev">Dev</span></h1>
+      <p class="hero-tagline">Amit The Developer Command &amp; Learning Hub</p>
+      <p class="hero-sub"> Quick command references and learning guides for the tools developers use every day. Pick a topic, learn the essentials, ship faster.</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num">100</div><div class="stat-label">Commands</div></div>
+        <div class="stat"><div class="stat-num">5</div><div class="stat-label">Topics</div></div>
+        <div class="stat"><div class="stat-num">0</div><div class="stat-label">Fluff</div></div>
+      </div>
+      <div class="tech-stack">
+        <div class="tech-pill"><span>🐧</span> Linux</div>
+        <div class="tech-pill"><span>🌿</span> Git</div>
+        <div class="tech-pill"><span>🐳</span> Docker</div>
+        <div class="tech-pill"><span>🐍</span> Python</div>
+        <div class="tech-pill"><span>⚗️</span> Flask</div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <div class="container">
+      <div class="section-label">
+        <span class="section-label-text">Choose a Topic</span>
+        <div class="section-label-line"></div>
+      </div>
+      <div class="hub-grid">
+
+        <a href="{{ url_for('linux') }}" class="hub-card linux">
+          <div class="card-icon-row">
+            <div class="card-icon linux">🐧</div>
+            <span class="card-badge">20 commands</span>
+          </div>
+          <div class="card-title">Linux Commands</div>
+          <div class="card-desc">Navigate the filesystem, manage processes, handle permissions, and work the terminal like a power user.</div>
+          <div class="card-footer">
+            <span class="card-count">// linux · bash · shell</span>
+            <span class="card-cta">Explore <span>→</span></span>
+          </div>
+        </a>
+
+        <a href="{{ url_for('git') }}" class="hub-card git">
+          <div class="card-icon-row">
+            <div class="card-icon git">🌿</div>
+            <span class="card-badge">20 commands</span>
+          </div>
+          <div class="card-title">Git Commands</div>
+          <div class="card-desc">Master version control — from basic commits to branching, rebasing, and collaborative workflows.</div>
+          <div class="card-footer">
+            <span class="card-count">// git · vcs · github</span>
+            <span class="card-cta">Explore <span>→</span></span>
+          </div>
+        </a>
+
+        <a href="{{ url_for('docker') }}" class="hub-card docker">
+          <div class="card-icon-row">
+            <div class="card-icon docker">🐳</div>
+            <span class="card-badge">20 commands</span>
+          </div>
+          <div class="card-title">Docker Commands</div>
+          <div class="card-desc">Build, run, and manage containers. Cover images, volumes, networks, and Compose workflows end to end.</div>
+          <div class="card-footer">
+            <span class="card-count">// docker · containers · compose</span>
+            <span class="card-cta">Explore <span>→</span></span>
+          </div>
+        </a>
+
+        <a href="{{ url_for('python') }}" class="hub-card python">
+          <div class="card-icon-row">
+            <div class="card-icon python">🐍</div>
+            <span class="card-badge">20 tips</span>
+          </div>
+          <div class="card-title">Python Tips</div>
+          <div class="card-desc">Pythonic patterns, powerful builtins, and modern features to write cleaner, faster, more expressive code.</div>
+          <div class="card-footer">
+            <span class="card-count">// python · patterns · tricks</span>
+            <span class="card-cta">Explore <span>→</span></span>
+          </div>
+        </a>
+
+        <a href="{{ url_for('flask_tips') }}" class="hub-card flask">
+          <div class="card-icon-row">
+            <div class="card-icon flask">⚗️</div>
+            <span class="card-badge">20 tips</span>
+          </div>
+          <div class="card-title">Flask Tips</div>
+          <div class="card-desc">Blueprints, app factories, configs, error handlers, and production patterns for clean Flask applications.</div>
+          <div class="card-footer">
+            <span class="card-count">// flask · python · web</span>
+            <span class="card-cta">Explore <span>→</span></span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="footer-logo">SnapDev</span>
+        <span class="footer-copy">// Built with Flask · No fluff, just commands.</span>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('index') }}"      class="footer-link">Home</a>
+        <a href="{{ url_for('linux') }}"      class="footer-link">Linux</a>
+        <a href="{{ url_for('git') }}"        class="footer-link">Git</a>
+        <a href="{{ url_for('docker') }}"     class="footer-link">Docker</a>
+        <a href="{{ url_for('python') }}"     class="footer-link">Python</a>
+        <a href="{{ url_for('flask_tips') }}" class="footer-link">Flask</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker Commands · SnapDev</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <nav class="topbar">
+    <div class="container topbar-inner">
+      <a href="{{ url_for('index') }}" class="logo">
+        <div class="logo-mark">⚡</div>
+        SnapDev
+      </a>
+      <div class="nav-pills">
+        <a href="{{ url_for('linux') }}" class="nav-pill">Linux</a>
+        <a href="{{ url_for('git') }}" class="nav-pill">Git</a>
+        <a href="{{ url_for('docker') }}" class="nav-pill active">Docker</a>
+        <a href="{{ url_for('python') }}" class="nav-pill">Python</a>
+        <a href="{{ url_for('flask_tips') }}" class="nav-pill">Flask</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container page-header-inner">
+      <div>
+        <div class="page-icon docker">🐳</div>
+        <h1 class="page-title">Docker Commands</h1>
+        <p class="page-intro">Build images, run containers, manage volumes and networks, and orchestrate services with Compose. Everything from dev to prod in one place.</p>
+      </div>
+      <a href="{{ url_for('index') }}" class="back-btn">← Back to Hub</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="count-badge">
+        ⚡ {{ commands | length }} entries in this section
+      </div>
+
+      <div class="section-label">
+        <span class="section-label-text">docker · containers · devops</span>
+        <div class="section-label-line"></div>
+      </div>
+
+      <div class="cmd-grid">
+        {% for cmd in commands %}
+        <div class="cmd-card">
+          <div class="cmd-card-header">
+            <span class="cmd-name">{{ cmd.name }}</span>
+            <button class="copy-btn" title="Copy example">Copy</button>
+          </div>
+          <p class="cmd-desc">{{ cmd.desc }}</p>
+          <div class="cmd-code-wrap">
+            <div class="cmd-code-header">
+              <div class="cmd-code-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="cmd-code-label">example</span>
+            </div>
+            <pre class="cmd-example">{{ cmd.example }}</pre>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="footer-logo">SnapDev</span>
+        <span class="footer-copy">// Docker Commands Reference</span>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('index') }}" class="footer-link">Home</a>
+        <a href="{{ url_for('linux') }}" class="footer-link">Linux</a>
+        <a href="{{ url_for('git') }}" class="footer-link">Git</a>
+        <a href="{{ url_for('docker') }}" class="footer-link">Docker</a>
+        <a href="{{ url_for('python') }}" class="footer-link">Python</a>
+        <a href="{{ url_for('flask_tips') }}" class="footer-link">Flask</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const code = btn.closest('.cmd-card').querySelector('.cmd-example').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
