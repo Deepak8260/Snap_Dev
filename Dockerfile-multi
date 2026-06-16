@@ -1,0 +1,20 @@
+FROM python:3.9-slim as builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install -r requirements.txt --target=/app/deps
+
+FROM gcr.io/distroless/python3-debian13
+
+WORKDIR /app
+
+COPY --from=builder /app/deps /app/deps
+COPY --from=builder /app .
+
+EXPOSE 5000
+
+ENV PYTHONPATH="/app/deps"
+
+CMD ["app.py"]
