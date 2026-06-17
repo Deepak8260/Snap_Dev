@@ -1,6 +1,6 @@
 # SnapDev — Flask App DevOps Pipeline
 
-> A complete end-to-end DevOps project that containerizes a Flask application using Docker, deploys it on AWS EC2, and automates the entire build-deploy lifecycle using a Jenkins Master-Agent architecture with GitHub Webhooks and email notifications.
+> A complete end-to-end DevOps project that containerizes a Flask web application using Docker (standard and multi-stage builds), manages deployment with Docker Compose, and automates the full build-test-deploy lifecycle using a Jenkins Master-Agent architecture with GitHub Webhooks and email notifications on AWS EC2.
 
 ---
 
@@ -17,7 +17,15 @@
   - [Step 4: Run the Container and Open Port 5000](#step-4-run-the-container-and-open-port-5000)
   - [Step 5: Push the Docker Image to DockerHub](#step-5-push-the-docker-image-to-dockerhub)
   - [Important Note on Instance Type](#important-note-on-instance-type)
-- [Part 2 — Automated CI/CD with Jenkins](#part-2--automated-cicd-with-jenkins)
+- [Part 2 — Docker Multi-Stage Build](#part-2--docker-multi-stage-build)
+  - [What is a Multi-Stage Build?](#what-is-a-multi-stage-build)
+  - [Standard Dockerfile vs Multi-Stage Dockerfile](#standard-dockerfile-vs-multi-stage-dockerfile)
+  - [How to Build and Run the Multi-Stage Image](#how-to-build-and-run-the-multi-stage-image)
+- [Part 3 — Docker Compose Deployment](#part-3--docker-compose-deployment)
+  - [What is Docker Compose?](#what-is-docker-compose)
+  - [docker-compose.yml Explained](#docker-composeyml-explained)
+  - [Running the App with Docker Compose](#running-the-app-with-docker-compose)
+- [Part 4 — Automated CI/CD with Jenkins](#part-4--automated-cicd-with-jenkins)
   - [Infrastructure Setup Overview](#infrastructure-setup-overview)
   - [Step 1: Launch Two Fresh EC2 Instances](#step-1-launch-two-fresh-ec2-instances)
   - [Step 2: Install Jenkins on the Master Node](#step-2-install-jenkins-on-the-master-node)
@@ -42,11 +50,15 @@
 
 ## Project Overview
 
-This project is split into two major parts.
+This project is divided into four major parts that progressively build on each other.
 
-**Part 1 — Manual Deployment:** The Flask application is containerized using Docker and deployed manually on an AWS EC2 instance. The Docker image is then pushed to DockerHub. This phase exists purely to validate that the application, Dockerfile, and Docker workflow are all working correctly before any automation is introduced.
+**Part 1 — Manual Docker Deployment:** The Flask application is containerized using a standard `Dockerfile` and deployed manually on an AWS EC2 instance. The Docker image is pushed to DockerHub. This phase validates that the application, Dockerfile, and Docker workflow all work correctly before automation is introduced.
 
-**Part 2 — Automated CI/CD Pipeline:** The manual EC2 instance from Part 1 is terminated. Two fresh EC2 instances are created — one for Jenkins Master and one for the Jenkins Agent. Jenkins is configured with a Master-Agent architecture where the Master only orchestrates and the Agent does all the actual build and deployment work. From this point on, every code push to GitHub automatically triggers Jenkins, which builds the Docker image, pushes it to DockerHub, deploys the application, and sends an email notification about the build result.
+**Part 2 — Docker Multi-Stage Build:** A second Dockerfile (`Dockerfile-multi`) is introduced that uses multi-stage builds to produce a significantly smaller and more secure production image using Google's distroless base image. This section explains the concept, compares it to the standard build, and shows how to use it.
+
+**Part 3 — Docker Compose Deployment:** A `docker-compose.yml` file is used to manage the container lifecycle declaratively — building the image, naming the container, setting restart policies, and mapping ports — all from a single command.
+
+**Part 4 — Automated CI/CD Pipeline:** Two fresh EC2 instances are created — one for Jenkins Master and one for Jenkins Agent. Jenkins is configured with a Master-Agent architecture where the Master orchestrates and the Agent runs all build and deployment work. Every code push to GitHub automatically triggers Jenkins, which clones the code, builds the Docker image, pushes it to DockerHub, deploys via Docker Compose, and sends an email notification about the build result.
 
 ---
 
@@ -77,39 +89,40 @@ Developer Pushes Code
 
 ## Tech Stack
 
-| Component | Technology |
-|---|---|
-| Application | Python / Flask |
-| Containerization | Docker, Docker Compose |
-| Cloud Infrastructure | AWS EC2 (Ubuntu) |
-| CI/CD Server | Jenkins |
-| Source Control | GitHub |
-| Container Registry | DockerHub |
-| Email Notifications | Gmail SMTP / Jenkins Extended Email Plugin |
-| Automation Trigger | GitHub Webhook |
+| Component            | Technology                                 |
+|----------------------|--------------------------------------------|
+| Application          | Python / Flask                             |
+| Containerization     | Docker, Docker Compose, Multi-Stage Builds |
+| Cloud Infrastructure | AWS EC2 (Ubuntu)                           |
+| CI/CD Server         | Jenkins                                    |
+| Source Control       | GitHub                                     |
+| Container Registry   | DockerHub                                  |
+| Email Notifications  | Gmail SMTP / Jenkins Extended Email Plugin |
+| Automation Trigger   | GitHub Webhook                             |
 
 ---
 
 ## Repository Structure
 
 ```
-Flask-1-tier-app/
-├── app.py                              # Main Flask application
-├── requirements.txt                    # Python dependencies
-├── Dockerfile                          # Docker image definition
-├── docker-compose.yml                  # Docker Compose configuration
-├── Jenkinsfile                         # Jenkins pipeline definition
-├── Jenkins_Installation_For_AWS.sh     # Jenkins + Java installation script
-└── docker_setup.sh                     # Docker installation script
+Snap_Dev/
+├── app.py                   # Main Flask application
+├── requirements.txt         # Python dependencies
+├── Dockerfile               # Standard single-stage Docker build
+├── Dockerfile-multi         # Optimized multi-stage Docker build (distroless)
+├── docker-compose.yml       # Docker Compose service definition
+├── Jenkinsfile              # Jenkins declarative pipeline definition
+├── static/                  # Static assets (CSS, JS, images)
+├── templates/               # HTML templates for Flask
+├── .gitignore
+└── dummy.txt
 ```
-
-> The installation scripts are available in this repository. For EC2 instances, copy the script content from GitHub, create a new file on the instance using `vim`, paste the content in, save with `:wq`, and run it. This approach is explained in detail in each step below.
 
 ---
 
 ## Part 1 — Manual Docker Deployment
 
-This part validates the entire Docker setup manually before any automation is introduced. Once confirmed working, this instance will be terminated and you will move on to Part 2.
+This part validates the entire Docker setup manually before any automation is introduced. Once confirmed working, this instance will be terminated and you will move on to Part 2 and beyond.
 
 ---
 
@@ -141,19 +154,15 @@ sudo apt update && sudo apt upgrade -y
 
 ### Step 2: Install Docker on the Instance
 
-Copy the contents of `docker_setup.sh` from this repository. On the EC2 instance, create the file using `vim`:
+Install Docker using the official convenience script:
 
 ```bash
-vim docker_setup.sh
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker ubuntu
 ```
 
-Paste the script content inside, save and exit with `:wq`, then run it:
-
-```bash
-bash docker_setup.sh
-```
-
-After installation, refresh the Docker group so the current session picks up the Docker permission without a reboot:
+Refresh the Docker group so the current session picks up the Docker permission without a reboot:
 
 ```bash
 newgrp docker
@@ -173,8 +182,26 @@ docker ps
 Clone this repository on the EC2 instance:
 
 ```bash
-git clone https://github.com/Deepak8260/Flask-1-tier-app.git
-cd Flask-1-tier-app
+git clone https://github.com/Deepak8260/Snap_Dev.git
+cd Snap_Dev
+```
+
+The standard `Dockerfile` is:
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY . .
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]
 ```
 
 Build the Docker image:
@@ -182,8 +209,6 @@ Build the Docker image:
 ```bash
 docker build -t flask-app .
 ```
-
-This reads the `Dockerfile` in the project root and packages the Flask application into a container image.
 
 ---
 
@@ -195,7 +220,7 @@ Run the Docker container:
 docker run -d -p 5000:5000 flask-app
 ```
 
-The Flask application runs on port 5000. Open that port in AWS:
+Open port 5000 in AWS:
 
 1. Go to **AWS Console → EC2 → Your Instance → Security → Security Groups**
 2. Click **Edit Inbound Rules → Add Rule**:
@@ -216,7 +241,7 @@ You should see the Flask application running successfully.
 
 ### Step 5: Push the Docker Image to DockerHub
 
-Log in to DockerHub using your username and a **Personal Access Token** (not your account password):
+Log in to DockerHub using a **Personal Access Token** (not your account password):
 
 ```bash
 docker login -u <your-dockerhub-username>
@@ -236,30 +261,208 @@ Push the image:
 docker push <your-dockerhub-username>/flask-app:latest
 ```
 
-The image is now available in your DockerHub repository. Part 1 is complete.
-
 > ✅ Once you have confirmed the application runs correctly and the image is on DockerHub, **terminate this EC2 instance**. Everything from here on is handled automatically by Jenkins.
 
 ---
 
 ### Important Note on Instance Type
 
-> ⚠️ `t2.micro` (free tier) is too small to comfortably run both Jenkins and Docker simultaneously — it will be slow and may crash during builds. For the manual validation in Part 1, `t3.medium` is recommended as it provides enough CPU and memory for a stable experience. For the Jenkins Master and Agent instances in Part 2, `t3.micro` is sufficient since each instance handles only one responsibility.
+> ⚠️ `t2.micro` (free tier) is too small to comfortably run both Jenkins and Docker simultaneously — it will be slow and may crash during builds. For manual validation in Part 1, `t3.medium` is recommended as it provides enough CPU and memory for a stable experience. For the Jenkins Master and Agent instances in Part 4, `t3.micro` is sufficient since each instance handles only one responsibility.
 
 ---
 
-## Part 2 — Automated CI/CD with Jenkins
+## Part 2 — Docker Multi-Stage Build
 
-With Part 1 confirmed and the test instance terminated, you will now set up a Jenkins Master-Agent pipeline. **Follow every step in the exact order listed — the sequence matters.**
+### What is a Multi-Stage Build?
+
+A multi-stage Docker build uses multiple `FROM` instructions in a single `Dockerfile`. Each `FROM` starts a new build stage. You can selectively copy artifacts from one stage to another, leaving behind everything you don't need in the final image — build tools, compilers, intermediate files, etc.
+
+The key benefits are:
+
+- **Dramatically smaller image size** — only the runtime essentials are packaged
+- **Improved security** — no build tools or unnecessary packages in the production image
+- **No intermediate images to clean up** — all intermediate layers are discarded automatically
+
+---
+
+### Standard Dockerfile vs Multi-Stage Dockerfile
+
+**Standard `Dockerfile`** (used in Part 1):
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD ["python", "app.py"]
+```
+
+This image includes pip, the Python installer, build utilities, and all installation artifacts — they remain in the final image even though they're not needed at runtime.
+
+---
+
+**Multi-Stage `Dockerfile-multi`** (this repository):
+
+```dockerfile
+# ── Stage 1: Builder ──────────────────────────────────────────────────────────
+FROM python:3.9-slim as builder
+
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt --target=/app/deps
+
+# ── Stage 2: Final (Distroless) ───────────────────────────────────────────────
+FROM gcr.io/distroless/python3-debian13
+
+WORKDIR /app
+COPY --from=builder /app/deps /app/deps
+COPY --from=builder /app .
+EXPOSE 5000
+ENV PYTHONPATH="/app/deps"
+CMD ["app.py"]
+```
+
+**How it works:**
+
+- **Stage 1 (`builder`)** — uses `python:3.9-slim` to install all dependencies into the `/app/deps` directory using `--target` (isolated install, not into the system Python)
+- **Stage 2 (final)** — uses Google's `distroless/python3-debian13` image, which contains only the Python runtime and nothing else: no shell, no package manager, no utilities
+- Only the installed dependencies and application code are copied from the builder stage into the final image
+- `PYTHONPATH` is set so Python can locate the dependencies at runtime
+
+**Result:** The final image is a fraction of the size of the standard image and has a drastically reduced attack surface — there is literally no shell to exploit.
+
+---
+
+### How to Build and Run the Multi-Stage Image
+
+Build using the multi-stage Dockerfile:
+
+```bash
+docker build -f Dockerfile-multi -t flask-app-mini .
+```
+
+Run the container:
+
+```bash
+docker run -d -p 5000:5000 flask-app-mini
+```
+
+Compare image sizes:
+
+```bash
+docker images
+```
+
+You will see that `flask-app-mini` is significantly smaller than `flask-app`.
+
+---
+
+## Part 3 — Docker Compose Deployment
+
+### What is Docker Compose?
+
+Docker Compose is a tool for defining and running multi-container (or single-container) Docker applications using a declarative YAML file. Instead of running long `docker run` commands with multiple flags, everything is defined in `docker-compose.yml` and the entire application stack is started with a single command.
+
+Benefits include:
+
+- Reproducible deployments — the configuration is version-controlled alongside the code
+- Automatic restart policies — containers restart on failure or reboot without manual intervention
+- Clean lifecycle management — one command to bring everything up, one command to tear everything down
+
+---
+
+### docker-compose.yml Explained
+
+```yaml
+services:
+  app:
+    build: .
+    image: snapimg-mini
+    container_name: snapcont
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+```
+
+| Field              | Purpose                                                                                   |
+|--------------------|-------------------------------------------------------------------------------------------|
+| `build: .`         | Builds the Docker image from the `Dockerfile` in the current directory                   |
+| `image: snapimg-mini` | Names the resulting image `snapimg-mini`                                               |
+| `container_name: snapcont` | Assigns a fixed, predictable name to the running container                      |
+| `restart: unless-stopped` | Automatically restarts the container if it crashes or the EC2 instance reboots — unless you manually stop it |
+| `ports: "5000:5000"` | Maps port 5000 on the host to port 5000 inside the container                           |
+
+---
+
+### Running the App with Docker Compose
+
+Make sure Docker Compose is installed. On modern Docker installations it is bundled as `docker compose` (without the hyphen):
+
+```bash
+docker compose version
+```
+
+If it is not available, install the plugin:
+
+```bash
+sudo apt install docker-compose-plugin -y
+```
+
+**Start the application:**
+
+```bash
+docker compose up -d
+```
+
+The `-d` flag runs it in detached (background) mode.
+
+**View running containers:**
+
+```bash
+docker compose ps
+```
+
+**View application logs:**
+
+```bash
+docker compose logs -f
+```
+
+**Stop the application:**
+
+```bash
+docker compose down
+```
+
+**Rebuild and restart after a code change:**
+
+```bash
+docker compose up -d --build
+```
+
+Access the application at:
+
+```
+http://<EC2-PUBLIC-IP>:5000
+```
+
+---
+
+## Part 4 — Automated CI/CD with Jenkins
+
+With the Docker and Docker Compose setup confirmed, you will now set up a Jenkins Master-Agent pipeline that automates the entire build and deployment process on every code push to GitHub. **Follow every step in the exact order listed — the sequence matters.**
 
 ---
 
 ### Infrastructure Setup Overview
 
-| Instance | Name | Role | What Is Installed |
-|---|---|---|---|
-| EC2 #1 | `jenkins-master` | Orchestration only | Jenkins + Java |
-| EC2 #2 | `agent-node` | Build and deploy | Java + Docker |
+| Instance | Name             | Role               | What Is Installed      |
+|----------|------------------|--------------------|------------------------|
+| EC2 #1   | `jenkins-master` | Orchestration only | Jenkins + Java         |
+| EC2 #2   | `agent-node`     | Build and deploy   | Java + Docker + Compose |
 
 The Master never builds or deploys anything itself. It receives the webhook trigger from GitHub, picks up the pipeline, and delegates all work to the Agent over SSH. The Agent does everything — clone, build, push, deploy.
 
@@ -269,13 +472,13 @@ The Master never builds or deploys anything itself. It receives the webhook trig
 
 Launch two separate EC2 instances with the following settings for each:
 
-| Setting | Value |
-|---|---|
-| AMI | Ubuntu (latest LTS) |
-| Instance Type | `t3.micro` |
-| Key Pair | Use the same key pair for both (simplifies SSH access) |
-| Network Settings | Enable SSH, HTTP, HTTPS |
-| Storage | 15 GB |
+| Setting          | Value                                                   |
+|------------------|---------------------------------------------------------|
+| AMI              | Ubuntu (latest LTS)                                     |
+| Instance Type    | `t3.micro`                                              |
+| Key Pair         | Use the same key pair for both (simplifies SSH access)  |
+| Network Settings | Enable SSH, HTTP, HTTPS                                 |
+| Storage          | 15 GB                                                   |
 
 Name them clearly:
 - Instance 1: `jenkins-master`
@@ -297,19 +500,31 @@ Update packages first:
 sudo apt update && sudo apt upgrade -y
 ```
 
-Copy the contents of `Jenkins_Installation_For_AWS.sh` from this repository. Create the file on the instance using `vim`:
+Install Java (required by Jenkins):
 
 ```bash
-vim Jenkins_Installation_For_AWS.sh
+sudo apt install -y fontconfig openjdk-21-jre
+java -version
 ```
 
-Paste the script content, save and exit with `:wq`, then run it:
+Install Jenkins:
 
 ```bash
-bash Jenkins_Installation_For_AWS.sh
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+sudo apt update
+sudo apt install jenkins -y
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
 ```
 
-This script installs both Java and Jenkins. Once the script finishes, open port `8080` in AWS so you can access Jenkins in a browser:
+Open port `8080` in AWS so you can access Jenkins in a browser:
 
 1. Go to **AWS Console → EC2 → `jenkins-master` instance → Security → Security Groups**
 2. Click **Edit Inbound Rules → Add Rule**:
@@ -342,7 +557,7 @@ On the next screen:
 - Leave the Jenkins URL as the default and click **Save and Finish**
 - Click **Start using Jenkins**
 
-You are now on the Jenkins Dashboard. Keep this browser tab open — most of the configuration from here onward happens inside Jenkins.
+You are now on the Jenkins Dashboard.
 
 ---
 
@@ -362,44 +577,29 @@ sudo apt update && sudo apt upgrade -y
 
 **Install Docker:**
 
-Copy the contents of `docker_setup.sh` from this repository. Create the file using `vim`:
-
 ```bash
-vim docker_setup.sh
-```
-
-Paste the script content, save and exit with `:wq`, then run it:
-
-```bash
-bash docker_setup.sh
-```
-
-Refresh the Docker group:
-
-```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker ubuntu
 newgrp docker
+docker --version
+```
+
+**Install Docker Compose plugin:**
+
+```bash
+sudo apt install docker-compose-plugin -y
+docker compose version
 ```
 
 **Install Java:**
 
-There is no separate Java installation script for the Agent. You have two options:
-
-- **Option A:** Open `Jenkins_Installation_For_AWS.sh` from this repository, copy only the Java installation commands from it, and run them on the Agent.
-- **Option B:** Follow the official Jenkins Linux installation guide at [https://www.jenkins.io/doc/book/installing/linux/](https://www.jenkins.io/doc/book/installing/linux/) and run only the Java installation step from there.
-
-Example command (verify the version matches what is in the script or the official guide):
-
 ```bash
 sudo apt install -y fontconfig openjdk-21-jre
-```
-
-Verify Java is installed:
-
-```bash
 java -version
 ```
 
-> You do **not** need to install Jenkins itself on the Agent. Only Java and Docker are required here. Java is needed because the Jenkins Agent communicates with the Master through a Java-based remote process.
+> You do **not** need to install Jenkins itself on the Agent. Only Java, Docker, and Docker Compose are required here. Java is needed because the Jenkins Agent communicates with the Master through a Java-based remote process.
 
 ---
 
@@ -413,7 +613,7 @@ cd pipeline-workspace
 pwd
 ```
 
-Copy the full output path — it will look like `/home/ubuntu/pipeline-workspace`. You will need this exact path in the next step when registering the agent inside Jenkins.
+Copy the full output path — it will look like `/home/ubuntu/pipeline-workspace`. You will need this exact path when registering the agent inside Jenkins.
 
 ---
 
@@ -461,24 +661,24 @@ Go back to the Jenkins browser tab:
 3. Select **Permanent Agent** and click **Create**
 4. Fill in the configuration form:
 
-| Field | Value |
-|---|---|
-| Description | Agent node that handles build and deployment for the Flask application |
-| Remote Root Directory | `/home/ubuntu/pipeline-workspace` |
-| Labels | `flask-builder` |
-| Usage | Use this node as much as possible |
-| Launch Method | Launch agents via SSH |
-| Host | Public IP of your `agent-node` EC2 instance |
+| Field                 | Value                                                                   |
+|-----------------------|-------------------------------------------------------------------------|
+| Description           | Agent node that handles build and deployment for the Flask application  |
+| Remote Root Directory | `/home/ubuntu/pipeline-workspace`                                       |
+| Labels                | `flask-app-agent`                                                       |
+| Usage                 | Use this node as much as possible                                       |
+| Launch Method         | Launch agents via SSH                                                   |
+| Host                  | Public IP of your `agent-node` EC2 instance                             |
 
 5. Under **Credentials**, click **Add → Jenkins** and fill in:
 
-| Field | Value |
-|---|---|
-| Kind | SSH Username with Private Key |
-| ID | `flask-agent-ssh-key` |
-| Description | SSH private key for Jenkins Master to connect to the Agent |
-| Username | `ubuntu` |
-| Private Key | Select **Enter directly** → paste the full contents of `~/.ssh/id_ed25519` from the Master |
+| Field       | Value                                                                                       |
+|-------------|---------------------------------------------------------------------------------------------|
+| Kind        | SSH Username with Private Key                                                               |
+| ID          | `flask-agent-ssh-key`                                                                       |
+| Description | SSH private key for Jenkins Master to connect to the Agent                                  |
+| Username    | `ubuntu`                                                                                    |
+| Private Key | Select **Enter directly** → paste the full contents of `~/.ssh/id_ed25519` from the Master  |
 
 6. Click **Add**, then select `flask-agent-ssh-key` from the Credentials dropdown
 7. Set **Host Key Verification Strategy** to `Non-verifying`
@@ -497,7 +697,7 @@ Watch the log output. After a few seconds you should see:
 Agent is successfully connected and online ✅
 ```
 
-The Jenkins Master and Agent are now fully connected over SSH. Any pipeline job labeled `flask-builder` will be routed to this Agent automatically.
+The Jenkins Master and Agent are now fully connected over SSH. Any pipeline job labeled `flask-app-agent` will be routed to this Agent automatically.
 
 ---
 
@@ -529,13 +729,13 @@ Gmail does not allow your regular account password to be used for SMTP. An App P
 1. Go to **Manage Jenkins → Credentials → System → Global credentials (unrestricted)**
 2. Click **Add Credentials** and fill in:
 
-| Field | Value |
-|---|---|
-| Kind | Username and Password |
-| Username | Your Gmail address (e.g., `yourname@gmail.com`) |
-| Password | The 16-character App Password from above |
-| ID | `gmail-app-password` |
-| Description | Gmail App Password for Jenkins build notifications |
+| Field       | Value                                               |
+|-------------|-----------------------------------------------------|
+| Kind        | Username and Password                               |
+| Username    | Your Gmail address (e.g., `yourname@gmail.com`)     |
+| Password    | The 16-character App Password from above            |
+| ID          | `gmail-app-password`                                |
+| Description | Gmail App Password for Jenkins build notifications  |
 
 3. Click **Create**
 
@@ -545,12 +745,12 @@ Gmail does not allow your regular account password to be used for SMTP. An App P
 2. Scroll down to the **Extended Email Notification** section
 3. Fill in **only these four fields** and leave everything else completely blank:
 
-| Field | Value |
-|---|---|
-| SMTP Server | `smtp.gmail.com` |
-| SMTP Port | `465` |
-| Credentials | Select `gmail-app-password` |
-| Use SSL | ✅ Checked |
+| Field       | Value                        |
+|-------------|------------------------------|
+| SMTP Server | `smtp.gmail.com`             |
+| SMTP Port   | `465`                        |
+| Credentials | Select `gmail-app-password`  |
+| Use SSL     | ✅ Checked                   |
 
 4. Click **Save**
 
@@ -567,13 +767,13 @@ The pipeline needs credentials to pull code from GitHub and push images to Docke
 1. Go to **Manage Jenkins → Credentials → System → Global credentials (unrestricted)**
 2. Click **Add Credentials** and fill in:
 
-| Field | Value |
-|---|---|
-| Kind | Username and Password |
-| Username | Your GitHub username |
-| Password | Your GitHub Personal Access Token |
-| ID | `github-credentials` |
-| Description | GitHub credentials for accessing the Flask app repository |
+| Field       | Value                                                      |
+|-------------|------------------------------------------------------------|
+| Kind        | Username and Password                                      |
+| Username    | Your GitHub username                                       |
+| Password    | Your GitHub Personal Access Token                          |
+| ID          | `github-credentials`                                       |
+| Description | GitHub credentials for accessing the Snap_Dev repository   |
 
 3. Click **Create**
 
@@ -583,13 +783,13 @@ The pipeline needs credentials to pull code from GitHub and push images to Docke
 
 1. Still in **Global credentials**, click **Add Credentials** again and fill in:
 
-| Field | Value |
-|---|---|
-| Kind | Username and Password |
-| Username | Your DockerHub username |
-| Password | Your DockerHub Personal Access Token |
-| ID | `dockerhub-credentials` |
-| Description | DockerHub credentials for pushing Flask app images |
+| Field       | Value                                               |
+|-------------|-----------------------------------------------------|
+| Kind        | Username and Password                               |
+| Username    | Your DockerHub username                             |
+| Password    | Your DockerHub Personal Access Token                |
+| ID          | `dockerhub-credentials`                             |
+| Description | DockerHub credentials for pushing Flask app images  |
 
 2. Click **Create**
 
@@ -610,35 +810,31 @@ Now you will create the actual pipeline job that pulls the `Jenkinsfile` from yo
 
 **Configure the Job:**
 
-You are now on the job configuration page. Work through it section by section:
-
 **General:**
 - Add a description: `CI/CD pipeline for the SnapDev Flask application`
 
 **Build Triggers:**
 - ✅ Check **GitHub hook trigger for GITScm polling**
 
-This links the GitHub webhook to this specific job. Every time GitHub sends a push event webhook to Jenkins, Jenkins will find all jobs with this option enabled and trigger them automatically. Without this checkbox ticked, the webhook has nothing to connect to and builds will not trigger automatically.
+This links the GitHub webhook to this specific job. Every time GitHub sends a push event webhook to Jenkins, Jenkins will find all jobs with this option enabled and trigger them automatically.
 
 **Pipeline:**
 
-This is the most important section. Change the **Definition** dropdown from `Pipeline script` to:
+Change the **Definition** dropdown from `Pipeline script` to:
 
 > **Pipeline script from SCM**
 
-This tells Jenkins to fetch the `Jenkinsfile` directly from your GitHub repository every time the pipeline runs, instead of requiring you to paste a script manually into the UI. This means any changes you push to the Jenkinsfile in GitHub are automatically picked up on the next build.
+This tells Jenkins to fetch the `Jenkinsfile` directly from your GitHub repository every time the pipeline runs, meaning changes pushed to the Jenkinsfile are automatically picked up on the next build.
 
 Fill in the fields that appear:
 
-| Field | Value |
-|---|---|
-| SCM | Git |
-| Repository URL | `https://github.com/Deepak8260/Flask-1-tier-app.git` |
-| Credentials | Select `github-credentials` |
-| Branch Specifier | `*/main` |
-| Script Path | `Jenkinsfile` |
-
-> **Script Path** tells Jenkins which file in the repository contains the pipeline definition. Since the `Jenkinsfile` is at the root of the repository, simply enter `Jenkinsfile` with no folder prefix.
+| Field            | Value                                              |
+|------------------|----------------------------------------------------|
+| SCM              | Git                                                |
+| Repository URL   | `https://github.com/Deepak8260/Snap_Dev.git`       |
+| Credentials      | Select `github-credentials`                        |
+| Branch Specifier | `*/main`                                           |
+| Script Path      | `Jenkinsfile`                                      |
 
 Click **Save**.
 
@@ -646,27 +842,27 @@ Click **Save**.
 
 ### Step 13: Set Up the GitHub Webhook
 
-The GitHub webhook is what makes GitHub notify Jenkins automatically on every push, which triggers the pipeline without any manual action.
+The GitHub webhook is what makes GitHub notify Jenkins automatically on every push, triggering the pipeline without any manual action.
 
-First, confirm that port `8080` is open to `0.0.0.0/0` on your `jenkins-master` Security Group (done in Step 2 — verify the Source is `Anywhere` and not restricted to just your IP).
+First, confirm that port `8080` is open to `0.0.0.0/0` on your `jenkins-master` Security Group (verify the Source is `Anywhere` and not restricted to just your IP).
 
 Then in GitHub:
 
 1. Go to your repository → **Settings → Webhooks → Add webhook**
 2. Fill in the form:
 
-| Field | Value |
-|---|---|
-| Payload URL | `http://<JENKINS-MASTER-PUBLIC-IP>:8080/github-webhook/` |
-| Content type | `application/json` |
-| SSL Verification | Disable |
-| Which events to trigger | Send me everything |
+| Field                   | Value                                                      |
+|-------------------------|------------------------------------------------------------|
+| Payload URL             | `http://<JENKINS-MASTER-PUBLIC-IP>:8080/github-webhook/`   |
+| Content type            | `application/json`                                         |
+| SSL Verification        | Disable                                                    |
+| Which events to trigger | Send me everything                                         |
 
 3. Click **Add webhook**
 
 GitHub will immediately send a test ping to Jenkins. In the **Recent Deliveries** section of that webhook, a green tick confirms Jenkins received and responded to the ping successfully.
 
-> ⚠️ The Payload URL must end with `/github-webhook/` including the trailing slash. Missing the slash is one of the most common reasons webhooks fail silently.
+> ⚠️ The Payload URL must end with `/github-webhook/` **including the trailing slash**. Missing the slash is one of the most common reasons webhooks fail silently.
 
 ---
 
@@ -680,7 +876,7 @@ Go to **Jenkins Dashboard → `flask-app-pipeline` → Build Now**. This is the 
 
 **Option B — Automatic trigger via Git push:**
 
-Make any small change to your repository (for example, update a comment in `app.py`) and push to GitHub:
+Make any small change to your repository and push to GitHub:
 
 ```bash
 git add .
@@ -692,15 +888,15 @@ The webhook fires, Jenkins picks it up within seconds, and the pipeline starts a
 
 **Monitor the build:**
 
-Click on the build number that appears under **Build History** on the left side of the job page, then click **Console Output**. You will see live logs of every stage running on the Agent — clone, Docker build, push to DockerHub, deploy with Docker Compose.
+Click on the build number that appears under **Build History** on the left side of the job page, then click **Console Output**. You will see live logs of every stage running on the Agent.
 
-A successful run will look like:
+A successful run will show:
 
 ```
-[Pipeline] stage: Clone Repository
-[Pipeline] stage: Build Docker Image
-[Pipeline] stage: Push to DockerHub
-[Pipeline] stage: Deploy Application
+[Pipeline] stage: Clone
+[Pipeline] stage: Build
+[Pipeline] stage: Test
+[Pipeline] stage: Deploy
 Finished: SUCCESS ✅
 ```
 
@@ -714,30 +910,85 @@ Once everything is configured, here is exactly what happens every time you push 
 
 1. **GitHub** detects the push and fires a webhook to Jenkins Master on port `8080`
 2. **Jenkins Master** receives the webhook and identifies the matching pipeline job (`flask-app-pipeline`)
-3. **Jenkins Master** delegates the entire pipeline to the Agent labeled `flask-builder` over SSH
+3. **Jenkins Master** delegates the entire pipeline to the Agent labeled `flask-app-agent` over SSH
 4. **Agent** clones the latest code from the GitHub repository
-5. **Agent** builds the Docker image using the `Dockerfile`
-6. **Agent** pushes the newly built image to DockerHub using the stored `dockerhub-credentials`
-7. **Agent** deploys the updated application using Docker Compose
-8. **On success** → Jenkins sends an email: *Build Successful — Flask App*
-9. **On failure** → Jenkins sends an email: *Build Failed — Flask App* with error details
+5. **Agent** removes any existing Docker image named `pandu` and builds a fresh one
+6. **Agent** runs the test stage
+7. **Agent** stops and removes any existing container named `gandu`, then deploys the updated container with Docker on port 5000
+8. **On success** → Jenkins sends an email: `SUCCESS: flask-app-pipeline #<build-number>`
+9. **On failure** → Jenkins sends an email: `FAILED: flask-app-pipeline #<build-number>` with error details
 10. **Jenkins Master** remains completely free throughout — it only orchestrates and never runs build work itself
 
 ---
 
 ## What the Jenkinsfile Does
 
-The `Jenkinsfile` at the root of this repository defines the complete pipeline. It:
+The `Jenkinsfile` at the root of this repository defines the complete pipeline as code:
 
-- Targets the Agent node with the label `flask-builder` so all work runs on the Agent, never the Master
-- Clones the latest application code from GitHub
-- Builds the Docker image from the `Dockerfile`
-- Authenticates with DockerHub using the stored `dockerhub-credentials` and pushes the image
-- Deploys the updated application using Docker Compose on the Agent
-- On **success** — sends a formatted email notification to the configured Gmail address
-- On **failure** — sends a failure notification email with build details
+```groovy
+pipeline {
+    agent { label 'flask-app-agent' }
 
-Refer to the `Jenkinsfile` in this repository for the complete pipeline script.
+    stages {
+        stage("clone") {
+            steps {
+                git url: "https://github.com/Deepak8260/Snap_Dev.git", branch: "main"
+                echo "cloned successfully"
+            }
+        }
+
+        stage("build") {
+            steps {
+                sh "docker rmi -f pandu || true"
+                sh "docker build -t pandu ."
+                echo "build successfully"
+            }
+        }
+
+        stage("test") {
+            steps {
+                echo "tested successfully"
+            }
+        }
+
+        stage("deploy") {
+            steps {
+                sh "docker stop gandu || true"
+                sh "docker rm -f gandu || true"
+                sh "docker run -d -p 5000:5000 --name gandu pandu"
+                echo "deployed successfully"
+            }
+        }
+    }
+
+    post {
+        success {
+            emailext(
+                to: 'kd.codegeek@gmail.com',
+                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build completed successfully."
+            )
+        }
+        failure {
+            emailext(
+                to: 'kd.codegeek@gmail.com',
+                subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build failed. Check Jenkins logs."
+            )
+        }
+    }
+}
+```
+
+**Stage-by-stage breakdown:**
+
+| Stage    | What It Does                                                                                        |
+|----------|-----------------------------------------------------------------------------------------------------|
+| `clone`  | Clones the latest code from the `main` branch of this repository onto the Agent                    |
+| `build`  | Removes the previous Docker image (`pandu`) if it exists, then builds a fresh image from `Dockerfile` |
+| `test`   | Placeholder test stage — extend this with `pytest` or any test framework as the project grows      |
+| `deploy` | Stops and removes the previous container (`gandu`) if running, then starts the updated container on port 5000 |
+| `post`   | Sends an email notification via Gmail SMTP on both success and failure                              |
 
 After making any changes to the Jenkinsfile, commit and push:
 
@@ -753,21 +1004,23 @@ This push will itself trigger the webhook and kick off a new build automatically
 
 ## Final Verification Checklist
 
-| What to Verify | Where to Check |
-|---|---|
-| Agent is online | Jenkins → Manage Jenkins → Nodes → `flask-app-agent` shows **Online** |
-| Gmail credentials saved | Jenkins → Manage Jenkins → Credentials → Global → `gmail-app-password` exists |
-| GitHub credentials saved | Jenkins → Manage Jenkins → Credentials → Global → `github-credentials` exists |
-| DockerHub credentials saved | Jenkins → Manage Jenkins → Credentials → Global → `dockerhub-credentials` exists |
-| SMTP configured correctly | Jenkins → Manage Jenkins → System → Extended Email Notification → only SMTP fields filled |
-| Pipeline job created | Jenkins Dashboard → `flask-app-pipeline` job exists |
-| Build Triggers enabled | Job config → Build Triggers → GitHub hook trigger for GITScm polling is checked |
-| SCM configured in job | Job config → Pipeline → Definition is `Pipeline script from SCM` → points to this repo |
-| Webhook is live | GitHub → Repository → Settings → Webhooks → Recent Deliveries → green tick ✅ |
-| Agent receives build work | Trigger a build → Console Output shows stages running on `flask-app-agent` |
-| Pipeline auto-triggers on push | Push any small change to GitHub → Jenkins build starts within seconds |
-| Email on success | Check inbox after a successful build |
-| Email on failure | Intentionally break something small, push, and verify the failure email arrives |
+| What to Verify                   | Where to Check                                                                             |
+|----------------------------------|--------------------------------------------------------------------------------------------|
+| Agent is online                  | Jenkins → Manage Jenkins → Nodes → `flask-app-agent` shows **Online**                      |
+| Gmail credentials saved          | Jenkins → Manage Jenkins → Credentials → Global → `gmail-app-password` exists              |
+| GitHub credentials saved         | Jenkins → Manage Jenkins → Credentials → Global → `github-credentials` exists              |
+| DockerHub credentials saved      | Jenkins → Manage Jenkins → Credentials → Global → `dockerhub-credentials` exists           |
+| SMTP configured correctly        | Jenkins → Manage Jenkins → System → Extended Email Notification → only SMTP fields filled  |
+| Pipeline job created             | Jenkins Dashboard → `flask-app-pipeline` job exists                                        |
+| Build Triggers enabled           | Job config → Build Triggers → GitHub hook trigger for GITScm polling is checked            |
+| SCM configured in job            | Job config → Pipeline → Definition is `Pipeline script from SCM` → points to this repo     |
+| Webhook is live                  | GitHub → Repository → Settings → Webhooks → Recent Deliveries → green tick ✅               |
+| Agent receives build work        | Trigger a build → Console Output shows stages running on `flask-app-agent`                 |
+| Pipeline auto-triggers on push   | Push any small change to GitHub → Jenkins build starts within seconds                      |
+| Docker Compose works             | Run `docker compose up -d` on the agent → container starts with name `snapcont`            |
+| Multi-stage image builds         | `docker build -f Dockerfile-multi -t flask-app-mini .` → verify smaller image size         |
+| Email on success                 | Check inbox after a successful build                                                       |
+| Email on failure                 | Intentionally break something small, push, and verify the failure email arrives            |
 
 ---
 
@@ -782,9 +1035,17 @@ This push will itself trigger the webhook and kick off a new build automatically
 - Confirm port `8080` is open in the `jenkins-master` Security Group with Source `0.0.0.0/0`
 - Check the Jenkins service is running: `sudo systemctl status jenkins`
 
-**Port 5000 / application not accessible (Part 1 only)**
+**Port 5000 / application not accessible**
 - Confirm the Security Group inbound rule for port `5000` has Source `0.0.0.0/0`
-- Verify the container is running with `docker ps` on the instance
+- Verify the container is running: `docker ps`
+
+**Docker Compose command not found**
+- Install the Compose plugin: `sudo apt install docker-compose-plugin -y`
+- Use `docker compose` (with a space, not `docker-compose`)
+
+**Multi-stage build fails**
+- Ensure Docker has internet access to pull `gcr.io/distroless/python3-debian13`
+- Confirm the `--target` flag is not used at build time; the `Dockerfile-multi` manages stages internally
 
 **Email notifications not sending**
 - Confirm 2-Step Verification was enabled on your Gmail account before the App Password was generated
@@ -793,8 +1054,8 @@ This push will itself trigger the webhook and kick off a new build automatically
 
 **GitHub Webhook shows a red X or 302 response**
 - Confirm port `8080` is open in the `jenkins-master` Security Group with Source `Anywhere (0.0.0.0/0)`
-- Confirm the Payload URL ends with `/github-webhook/` including the trailing slash
-- In Jenkins, go to **Manage Jenkins → Security** and confirm the webhook endpoint does not require authentication, or configure it with a secret token
+- Confirm the Payload URL ends with `/github-webhook/` **including the trailing slash**
+- In Jenkins, go to **Manage Jenkins → Security** and confirm the webhook endpoint does not require authentication
 
 **Pipeline does not auto-trigger on push but Build Now works**
 - Confirm the **GitHub hook trigger for GITScm polling** checkbox is checked inside the job's Build Triggers section
@@ -806,4 +1067,4 @@ This push will itself trigger the webhook and kick off a new build automatically
 
 ---
 
-> **GitHub Repository:** [https://github.com/Deepak8260/Flask-1-tier-app](https://github.com/Deepak8260/Flask-1-tier-app)
+> **GitHub Repository:** https://github.com/Deepak8260/Snap_Dev
