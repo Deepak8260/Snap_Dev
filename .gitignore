@@ -82,6 +82,19 @@ ehthumbs.db
 Desktop.ini
 
 
+# ── Terraform ─────────────────────────────────
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfvars
+*.tfvars.json
+tfplan
+
 # ── Docker (for future use) ───────────────────
 *.env.docker
 docker-compose.override.yml
