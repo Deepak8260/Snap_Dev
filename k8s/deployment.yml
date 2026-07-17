@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+
+
+kind: Deployment
+
+metadata:
+  name: snapdev-deployment
+  namespace: snapdev-ns
+  labels:
+    app: snapdev-label
+
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: snapdev-label
+
+  template:
+    metadata:
+      name: snapdev-pod
+      namespace: snapdev-ns
+      labels:
+        app: snapdev-label
+
+
+    spec:
+      containers:
+        - name: snapdev-cont
+          image: kumar3472/snapdev:latest
+          ports:
+            - containerPort: 5000
+
