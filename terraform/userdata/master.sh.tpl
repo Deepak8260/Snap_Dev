@@ -98,8 +98,17 @@ chmod -R 755 /var/lib/jenkins/casc_configs
 
 echo "[8/11] Installing Jenkins Plugins..."
 
-/usr/bin/jenkins-plugin-cli \
-    --plugin-file /var/lib/jenkins/casc_configs/plugins.txt
+
+wget -q \
+https://github.com/jenkinsci/plugin-installation-manager-tool/releases/download/2.13.2/jenkins-plugin-manager-2.13.2.jar \
+-O /opt/jenkins-plugin-manager.jar
+
+mkdir -p /var/lib/jenkins/plugins
+
+java -jar /opt/jenkins-plugin-manager.jar \
+    --war /usr/share/java/jenkins.war \
+    --plugin-file /var/lib/jenkins/casc_configs/plugins.txt \
+    --plugin-download-directory /var/lib/jenkins/plugins
 
 # --------------------------------------------------
 # Step 9: Configure Jenkins Environment
