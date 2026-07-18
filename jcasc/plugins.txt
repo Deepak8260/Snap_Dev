@@ -1,0 +1,13 @@
+configuration-as-code
+configuration-as-code-support
+git
+github
+workflow-aggregator
+pipeline-stage-view
+docker-workflow
+credentials
+ssh-slaves
+ssh-credentials
+job-dsl
+matrix-auth
+docker-commons

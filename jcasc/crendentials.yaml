@@ -1,0 +1,37 @@
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+
+          # -----------------------------
+          # GitHub Credentials
+          # -----------------------------
+          - usernamePassword:
+              id: "github-creds"
+              scope: GLOBAL
+              username: "${GITHUB_USERNAME}"
+              password: "${GITHUB_TOKEN}"
+              description: "GitHub Credentials"
+
+          # -----------------------------
+          # Docker Hub Credentials
+          # -----------------------------
+          - usernamePassword:
+              id: "dockerhub-creds"
+              scope: GLOBAL
+              username: "${DOCKERHUB_USERNAME}"
+              password: "${DOCKERHUB_PASSWORD}"
+              description: "Docker Hub Credentials"
+
+          # -----------------------------
+          # SSH Key for Jenkins Agent
+          # -----------------------------
+          - basicSSHUserPrivateKey:
+              id: "agent-ssh-key"
+              scope: GLOBAL
+              username: "ubuntu"
+              description: "SSH Key for Jenkins Agent"
+
+              privateKeySource:
+                directEntry:
+                  privateKey: "${AGENT_SSH_PRIVATE_KEY}"
