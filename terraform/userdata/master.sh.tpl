@@ -110,31 +110,37 @@ java -jar /opt/jenkins-plugin-manager.jar \
     --plugin-file /var/lib/jenkins/casc_configs/plugins.txt \
     --plugin-download-directory /var/lib/jenkins/plugins
 
+
+chown -R jenkins:jenkins /var/lib/jenkins/plugins
+
 # --------------------------------------------------
 # Step 9: Configure Jenkins Environment
 # --------------------------------------------------
 
 echo "[9/11] Configuring Jenkins Environment..."
 
-cat <<EOF >/etc/default/jenkins
-JENKINS_ADMIN_USERNAME=${jenkins_admin_username}
-JENKINS_ADMIN_PASSWORD=${jenkins_admin_password}
+mkdir -p /etc/systemd/system/jenkins.service.d
 
-GITHUB_USERNAME=${github_username}
-GITHUB_TOKEN=${github_token}
+cat <<EOF >/etc/systemd/system/jenkins.service.d/override.conf
+[Service]
+Environment="JENKINS_ADMIN_USERNAME=${jenkins_admin_username}"
+Environment="JENKINS_ADMIN_PASSWORD=${jenkins_admin_password}"
 
-DOCKERHUB_USERNAME=${dockerhub_username}
-DOCKERHUB_PASSWORD=${dockerhub_password}
+Environment="GITHUB_USERNAME=${github_username}"
+Environment="GITHUB_TOKEN=${github_token}"
 
-AGENT_SSH_PRIVATE_KEY='${agent_ssh_private_key}'
+Environment="DOCKERHUB_USERNAME=${dockerhub_username}"
+Environment="DOCKERHUB_PASSWORD=${dockerhub_password}"
 
-AGENT_NAME=${agent_name}
-AGENT_LABELS="${agent_labels}"
-AGENT_REMOTE_FS=${agent_remote_fs}
-AGENT_EXECUTORS=${agent_executors}
-AGENT_PRIVATE_IP=${agent_private_ip}
+Environment="AGENT_SSH_PRIVATE_KEY=${agent_ssh_private_key}"
 
-CASC_JENKINS_CONFIG=/var/lib/jenkins/casc_configs
+Environment="AGENT_NAME=${agent_name}"
+Environment="AGENT_LABELS=${agent_labels}"
+Environment="AGENT_REMOTE_FS=${agent_remote_fs}"
+Environment="AGENT_EXECUTORS=${agent_executors}"
+Environment="AGENT_PRIVATE_IP=${agent_private_ip}"
+
+Environment="CASC_JENKINS_CONFIG=/var/lib/jenkins/casc_configs"
 EOF
 
 # --------------------------------------------------
@@ -145,7 +151,8 @@ echo "[10/11] Starting Jenkins..."
 
 systemctl daemon-reload
 systemctl enable jenkins
-systemctl restart jenkins
+systemctl stop jenkins || true
+systemctl start jenkins
 
 # --------------------------------------------------
 # Step 11: Verification
