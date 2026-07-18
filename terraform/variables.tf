@@ -62,3 +62,59 @@ variable "my_ip" {
   description = "Your public IP address in CIDR format (Example: 49.xxx.xxx.xxx/32)."
   type        = string
 }
+
+##############################
+# Jenkins Configuration
+##############################
+
+variable "jenkins_admin_username" {
+  description = "Jenkins administrator username"
+  type        = string
+}
+
+variable "jenkins_admin_password" {
+  description = "Jenkins administrator password"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_username" {}
+variable "github_token" {}
+
+variable "dockerhub_username" {}
+variable "dockerhub_password" {}
+
+variable "agent_ssh_private_key" {
+  sensitive = true
+}
+
+
+variable "controller_public_key" {
+  description = "Public key used by Jenkins Controller to connect to Agent"
+  type        = string
+}
+
+
+##################################################
+# Jenkins Agent Configuration
+##################################################
+
+variable "agent_name" {
+  description = "Jenkins Agent Name"
+  type        = string
+}
+
+variable "agent_labels" {
+  description = "Labels assigned to Jenkins Agent"
+  type        = string
+}
+
+variable "agent_remote_fs" {
+  description = "Remote workspace directory"
+  type        = string
+}
+
+variable "agent_executors" {
+  description = "Number of executors on Agent"
+  type        = number
+}

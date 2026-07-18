@@ -14,7 +14,52 @@ resource "aws_instance" "master" {
 
   associate_public_ip_address = true
 
-  user_data = file("${path.module}/userdata/master.sh")
+  user_data = templatefile(
+    "${path.module}/userdata/master.sh.tpl",
+    {
+
+      # ----------------------------------
+      # Jenkins Admin
+      # ----------------------------------
+
+      jenkins_admin_username = var.jenkins_admin_username
+      jenkins_admin_password = var.jenkins_admin_password
+
+      # ----------------------------------
+      # GitHub Credentials
+      # ----------------------------------
+
+      github_username = var.github_username
+      github_token    = var.github_token
+
+      # ----------------------------------
+      # Docker Hub Credentials
+      # ----------------------------------
+
+      dockerhub_username = var.dockerhub_username
+      dockerhub_password = var.dockerhub_password
+
+      # ----------------------------------
+      # SSH Credential for Jenkins Agent
+      # ----------------------------------
+
+      agent_ssh_private_key = var.agent_ssh_private_key
+
+      # ----------------------------------
+      # Agent Configuration
+      # ----------------------------------
+
+      agent_name       = var.agent_name
+      agent_labels     = var.agent_labels
+      agent_remote_fs  = var.agent_remote_fs
+      agent_executors  = var.agent_executors
+
+      # Terraform gets this automatically
+      agent_private_ip = aws_instance.agent.private_ip
+    }
+  )
+
+  user_data_replace_on_change = true
 
   tags = {
     Name = var.master_instance_name
@@ -37,7 +82,16 @@ resource "aws_instance" "agent" {
 
   associate_public_ip_address = true
 
-  user_data = file("${path.module}/userdata/agent.sh")
+  user_data = templatefile(
+    "${path.module}/userdata/agent.sh.tpl",
+    {
+
+      controller_public_key = var.controller_public_key
+
+    }
+  )
+
+  user_data_replace_on_change = true
 
   tags = {
     Name = var.agent_instance_name

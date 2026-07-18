@@ -1,0 +1,15 @@
+jenkins:
+  systemMessage: |
+    Welcome to Snap_Dev Jenkins Controller
+
+    This Jenkins instance is managed using Jenkins Configuration as Code (JCasC).
+
+    Controller Responsibilities:
+    - Receive GitHub Webhooks
+    - Schedule and Trigger Pipelines
+    - Manage Users, Credentials and Plugins
+    - Delegate all build execution to Jenkins Agents
+
+  numExecutors: 0
+
+  mode: EXCLUSIVE
