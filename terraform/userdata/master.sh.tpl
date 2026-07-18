@@ -123,6 +123,8 @@ mkdir -p /etc/systemd/system/jenkins.service.d
 
 cat <<EOF >/etc/systemd/system/jenkins.service.d/override.conf
 [Service]
+Environment="JAVA_OPTS=-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
+
 Environment="JENKINS_ADMIN_USERNAME=${jenkins_admin_username}"
 Environment="JENKINS_ADMIN_PASSWORD=${jenkins_admin_password}"
 
