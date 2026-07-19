@@ -43,7 +43,7 @@ resource "aws_instance" "master" {
       # SSH Credential for Jenkins Agent
       # ----------------------------------
 
-      agent_ssh_private_key = var.agent_ssh_private_key
+      agent_ssh_private_key = tls_private_key.jenkins_agent.private_key_openssh
 
       # ----------------------------------
       # Agent Configuration
@@ -86,7 +86,7 @@ resource "aws_instance" "agent" {
     "${path.module}/userdata/agent.sh.tpl",
     {
 
-      controller_public_key = var.controller_public_key
+      controller_public_key = tls_private_key.jenkins_agent.public_key_openssh
 
     }
   )

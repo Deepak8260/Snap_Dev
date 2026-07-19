@@ -84,17 +84,6 @@ variable "github_token" {}
 variable "dockerhub_username" {}
 variable "dockerhub_password" {}
 
-variable "agent_ssh_private_key" {
-  sensitive = true
-}
-
-
-variable "controller_public_key" {
-  description = "Public key used by Jenkins Controller to connect to Agent"
-  type        = string
-}
-
-
 ##################################################
 # Jenkins Agent Configuration
 ##################################################
