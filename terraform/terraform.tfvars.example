@@ -19,3 +19,23 @@ my_ip = "YOUR_PUBLIC_IP/32"
 jenkins_admin_username = "admin"
 
 jenkins_admin_password = "CHANGE_ME"
+
+github_username = "YOUR_GITHUB_USERNAME"
+
+github_token = "YOUR_GITHUB_TOKEN"
+
+dockerhub_username = "YOUR_DOCKERHUB_USERNAME"
+
+dockerhub_password = "YOUR_DOCKERHUB_PASSWORD"
+
+agent_ssh_private_key = "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+
+controller_public_key = "ssh-rsa AAAA... your-controller-key"
+
+agent_name = "snapdev-agent"
+
+agent_labels = "docker,linux"
+
+agent_remote_fs = "/home/ubuntu/jenkins"
+
+agent_executors = 2
