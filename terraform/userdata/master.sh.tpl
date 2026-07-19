@@ -93,6 +93,20 @@ chown -R jenkins:jenkins /var/lib/jenkins/casc_configs
 chmod -R 755 /var/lib/jenkins/casc_configs
 
 # --------------------------------------------------
+# Copy Groovy Initialization Scripts
+# --------------------------------------------------
+
+echo "Copying Groovy initialization scripts..."
+
+mkdir -p /var/lib/jenkins/init.groovy.d
+
+cp -r /home/ubuntu/Snap_Dev/init.groovy.d/* \
+/var/lib/jenkins/init.groovy.d/
+
+chown -R jenkins:jenkins /var/lib/jenkins/init.groovy.d
+
+
+# --------------------------------------------------
 # Step 8: Install Jenkins Plugins
 # --------------------------------------------------
 
@@ -134,8 +148,6 @@ Environment="GITHUB_TOKEN=${github_token}"
 Environment="DOCKERHUB_USERNAME=${dockerhub_username}"
 Environment="DOCKERHUB_PASSWORD=${dockerhub_password}"
 
-Environment="AGENT_SSH_PRIVATE_KEY=${agent_ssh_private_key}"
-
 Environment="AGENT_NAME=${agent_name}"
 Environment="AGENT_LABELS=${agent_labels}"
 Environment="AGENT_REMOTE_FS=${agent_remote_fs}"
@@ -144,6 +156,19 @@ Environment="AGENT_PRIVATE_IP=${agent_private_ip}"
 
 Environment="CASC_JENKINS_CONFIG=/var/lib/jenkins/casc_configs"
 EOF
+
+# ------------------------------------------
+# Write SSH Private Key to File
+# ------------------------------------------
+
+mkdir -p /var/lib/jenkins/secrets
+
+cat <<EOF >/var/lib/jenkins/secrets/agent_key
+${agent_ssh_private_key}
+EOF
+
+chmod 600 /var/lib/jenkins/secrets/agent_key
+chown jenkins:jenkins /var/lib/jenkins/secrets/agent_key
 
 # --------------------------------------------------
 # Step 10: Enable and Start Jenkins
