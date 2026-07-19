@@ -27,7 +27,12 @@ java -version
 apt-get install -y docker.io
 
 systemctl enable docker
+
 systemctl start docker
+
+usermod -aG docker ubuntu
+
+systemctl restart docker
 
 # --------------------------------------------------
 # Install Git
