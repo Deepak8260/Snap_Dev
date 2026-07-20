@@ -18,7 +18,7 @@ pipeline {
                     docker compose pull
                 '''
 
-                echo 'Latest Docker image pulled successfully.'
+                echo 'Latest Docker image pulled successfully .'
             }
         }
 
