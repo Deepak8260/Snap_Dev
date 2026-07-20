@@ -37,7 +37,7 @@ pipeline {
 
     success {
 
-        emailext(
+        mail(
             to: 'kd.codegeek@gmail.com',
             subject: "✅ Snap Dev CI/CD | Build Success #${env.BUILD_NUMBER}",
             mimeType: 'text/html',
@@ -174,7 +174,7 @@ Snap Dev • Automated Jenkins CI/CD Pipeline
 
     failure {
 
-        emailext(
+        mail(
             to: 'kd.codegeek@gmail.com',
             subject: "❌ Snap Dev CI/CD | Build Failed #${env.BUILD_NUMBER}",
             mimeType: 'text/html',
