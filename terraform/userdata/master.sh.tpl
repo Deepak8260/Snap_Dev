@@ -56,18 +56,6 @@ else
 fi
 
 # --------------------------------------------------
-# Copy Jenkinsfile for Bootstrap
-# --------------------------------------------------
-
-mkdir -p /var/lib/jenkins/bootstrap
-
-cp /home/ubuntu/Snap_Dev/jenkins/Jenkinsfile-compose \
-   /var/lib/jenkins/bootstrap/
-
-chown -R jenkins:jenkins /var/lib/jenkins/bootstrap
-chmod -R 755 /var/lib/jenkins/bootstrap
-
-# --------------------------------------------------
 # Step 5: Add Jenkins Repository
 # --------------------------------------------------
 
@@ -89,6 +77,18 @@ echo "[6/11] Installing Jenkins..."
 
 apt update -y
 apt install -y jenkins
+
+# --------------------------------------------------
+# Copy Jenkinsfile for Bootstrap
+# --------------------------------------------------
+
+mkdir -p /var/lib/jenkins/bootstrap
+
+cp /home/ubuntu/Snap_Dev/jenkins/Jenkinsfile-compose \
+   /var/lib/jenkins/bootstrap/
+
+chown -R jenkins:jenkins /var/lib/jenkins/bootstrap
+chmod -R 755 /var/lib/jenkins/bootstrap
 
 # --------------------------------------------------
 # Step 7: Prepare JCasC Directory
