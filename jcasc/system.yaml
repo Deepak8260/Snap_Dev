@@ -21,6 +21,31 @@ unclassified:
     smtpHost: "${SMTP_SERVER}"
     smtpPort: "${SMTP_PORT}"
     useSsl: ${SMTP_SSL}
+    useTls: false
+    charset: "UTF-8"
     authentication:
       username: "${SMTP_USERNAME}"
       password: "${SMTP_PASSWORD}"
+
+  email-ext:
+    charset: "UTF-8"
+    debugMode: false
+    allowUnregisteredEnabled: false
+    adminRequiredForTemplateTesting: false
+
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    defaultBody: |-
+      $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+      Check console output at $BUILD_URL to view the results.
+
+    defaultTriggerIds:
+      - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+
+    mailAccount: {}
+
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: -1
+    precedenceBulk: false
+    throttlingEnabled: false
+    watchingEnabled: false
