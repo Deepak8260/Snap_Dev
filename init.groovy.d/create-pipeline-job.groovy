@@ -16,7 +16,7 @@ if (jenkins.getItem(jobName) != null) {
     return
 }
 
-def pipelineFile = new File("/home/ubuntu/Snap_Dev/jenkins/Jenkinsfile-compose")
+def pipelineFile = new File("/var/lib/jenkins/bootstrap/Jenkinsfile-compose")
 
 if (!pipelineFile.exists()) {
     println "ERROR: Jenkinsfile-compose not found at ${pipelineFile.absolutePath}"
