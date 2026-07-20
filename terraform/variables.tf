@@ -107,3 +107,31 @@ variable "agent_executors" {
   description = "Number of executors on Agent"
   type        = number
 }
+
+##################################################
+# Jenkins Email-Notification Configuration
+##################################################
+
+variable "smtp_server" {
+  default = "smtp.gmail.com"
+}
+
+variable "smtp_port" {
+  default = "465"
+}
+
+variable "smtp_username" {
+  sensitive = true
+}
+
+variable "smtp_password" {
+  sensitive = true
+}
+
+variable "smtp_ssl" {
+  default = true
+}
+
+variable "admin_email" {
+  sensitive = true
+}
