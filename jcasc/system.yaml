@@ -11,5 +11,17 @@ jenkins:
     - Delegate all build execution to Jenkins Agents
 
   numExecutors: 0
-
   mode: EXCLUSIVE
+
+unclassified:
+  location:
+    url: "${JENKINS_URL}"
+    adminAddress: "${ADMIN_EMAIL}"
+
+  mailer:
+    smtpHost: "${SMTP_SERVER}"
+    smtpPort: "${SMTP_PORT}"
+    useSsl: ${SMTP_SSL}
+    authentication:
+      username: "${SMTP_USERNAME}"
+      password: "${SMTP_PASSWORD}"

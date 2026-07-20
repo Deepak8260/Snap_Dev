@@ -166,6 +166,14 @@ Environment="AGENT_REMOTE_FS=${agent_remote_fs}"
 Environment="AGENT_EXECUTORS=${agent_executors}"
 Environment="AGENT_PRIVATE_IP=${agent_private_ip}"
 
+Environment="SMTP_SERVER=${smtp_server}"
+Environment="SMTP_PORT=${smtp_port}"
+Environment="SMTP_USERNAME=${smtp_username}"
+Environment="SMTP_PASSWORD=${smtp_password}"
+Environment="SMTP_SSL=${smtp_ssl}"
+Environment="ADMIN_EMAIL=${admin_email}"
+Environment="JENKINS_URL=http://${controller_public_ip}:8080/"
+
 Environment="CASC_JENKINS_CONFIG=/var/lib/jenkins/casc_configs"
 EOF
 
