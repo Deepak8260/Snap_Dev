@@ -15,7 +15,6 @@ jenkins:
 
 unclassified:
   location:
-    url: "${JENKINS_URL}"
     adminAddress: "${ADMIN_EMAIL}"
 
   mailer:

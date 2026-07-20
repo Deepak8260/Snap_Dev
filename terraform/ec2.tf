@@ -54,6 +54,16 @@ resource "aws_instance" "master" {
       agent_remote_fs  = var.agent_remote_fs
       agent_executors  = var.agent_executors
 
+      # ----------------------------------
+      # SMTP Configuration
+      # ----------------------------------
+      smtp_server   = var.smtp_server
+      smtp_port     = var.smtp_port
+      smtp_ssl      = var.smtp_ssl
+      smtp_username = var.smtp_username
+      smtp_password = var.smtp_password
+      admin_email   = var.admin_email
+
       # Terraform gets this automatically
       agent_private_ip = aws_instance.agent.private_ip
     }
