@@ -10,4 +10,5 @@ ssh-credentials
 job-dsl
 matrix-auth
 docker-commons
+mailer
 email-ext
