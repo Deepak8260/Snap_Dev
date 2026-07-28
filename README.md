@@ -82,7 +82,7 @@ flowchart TD
 
 ### Phase 1: Infrastructure Provisioning with Terraform
 
-Navigate to the [`terraform/`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/terraform) directory, configure variables, and run Terraform:
+Navigate to the [`terraform/`](terraform/) directory, configure variables, and run Terraform:
 
 ```bash
 cd terraform

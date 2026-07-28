@@ -8,11 +8,11 @@ This module documents the Jenkins Configuration as Code (JCasC) YAML manifests u
 
 | File Name | Targeted JCasC Namespace | Primary Responsibilities |
 | --- | --- | --- |
-| [`system.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/system.yaml) | `jenkins`, `unclassified` | System message banner, controller executor isolation (`numExecutors: 0`), system admin email, global SMTP mailer settings, and `email-ext` failure triggers. |
-| [`security.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/security.yaml) | `jenkins.securityRealm`, `jenkins.authorizationStrategy` | Disables signup, creates local admin account from environment variables (`JENKINS_ADMIN_USERNAME`), and applies Global Matrix RBAC permissions. |
-| [`credentials.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/credentials.yaml) | `credentials.system.domainCredentials` | Provisions global credentials for `github-creds` (Personal Access Token), `dockerhub-creds` (DockerHub login), and `smtp-creds` (Mail authentication). |
-| [`nodes.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/nodes.yaml) | `jenkins.nodes` | Provisions the permanent SSH build agent node (`flask-app-agent`) connecting over private IP to port 22 using credential `agent-ssh-key`. |
-| [`plugins.txt`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/plugins.txt) | Plugin Management | List of 14 plugins required for pipeline execution, matrix auth, Docker workflow, and email extension. |
+| [`system.yaml`](system.yaml) | `jenkins`, `unclassified` | System message banner, controller executor isolation (`numExecutors: 0`), system admin email, global SMTP mailer settings, and `email-ext` failure triggers. |
+| [`security.yaml`](security.yaml) | `jenkins.securityRealm`, `jenkins.authorizationStrategy` | Disables signup, creates local admin account from environment variables (`JENKINS_ADMIN_USERNAME`), and applies Global Matrix RBAC permissions. |
+| [`credentials.yaml`](credentials.yaml) | `credentials.system.domainCredentials` | Provisions global credentials for `github-creds` (Personal Access Token), `dockerhub-creds` (DockerHub login), and `smtp-creds` (Mail authentication). |
+| [`nodes.yaml`](nodes.yaml) | `jenkins.nodes` | Provisions the permanent SSH build agent node (`flask-app-agent`) connecting over private IP to port 22 using credential `agent-ssh-key`. |
+| [`plugins.txt`](plugins.txt) | Plugin Management | List of 14 plugins required for pipeline execution, matrix auth, Docker workflow, and email extension. |
 
 ---
 
@@ -20,7 +20,7 @@ This module documents the Jenkins Configuration as Code (JCasC) YAML manifests u
 
 ### 1. Controller System & Mailer (`system.yaml`)
 
-The manifest [`system.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/system.yaml) enforces controller security boundaries and notification channels:
+The manifest [`system.yaml`](system.yaml) enforces controller security boundaries and notification channels:
 
 ```yaml
 jenkins:
@@ -75,7 +75,7 @@ unclassified:
 
 ### 2. Authentication & Authorization (`security.yaml`)
 
-The manifest [`security.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/security.yaml) configures authentication and RBAC permissions:
+The manifest [`security.yaml`](security.yaml) configures authentication and RBAC permissions:
 
 ```yaml
 jenkins:
@@ -104,7 +104,7 @@ jenkins:
 
 ### 3. Automated Credentials Store (`credentials.yaml`)
 
-The manifest [`credentials.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/credentials.yaml) injects global credentials into the Jenkins credentials provider:
+The manifest [`credentials.yaml`](credentials.yaml) injects global credentials into the Jenkins credentials provider:
 
 ```yaml
 credentials:
@@ -137,7 +137,7 @@ credentials:
 
 ### 4. Build Agent Node Topology (`nodes.yaml`)
 
-The manifest [`nodes.yaml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/nodes.yaml) registers the permanent SSH build agent node:
+The manifest [`nodes.yaml`](nodes.yaml) registers the permanent SSH build agent node:
 
 ```yaml
 jenkins:
@@ -168,7 +168,7 @@ jenkins:
 
 ### 5. Plugin Audit Table (`plugins.txt`)
 
-The manifest [`plugins.txt`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jcasc/plugins.txt) lists all 14 required Jenkins plugins:
+The manifest [`plugins.txt`](plugins.txt) lists all 14 required Jenkins plugins:
 
 | Plugin Name | Functional Purpose |
 | --- | --- |

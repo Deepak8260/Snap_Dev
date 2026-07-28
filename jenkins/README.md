@@ -8,8 +8,8 @@ This module documents the production Jenkins declarative pipeline manifests used
 
 | Pipeline File | Target Agent | Primary Deployment Strategy | Reporting Mechanism | Cleanup Action |
 | --- | --- | --- | --- | --- |
-| [`Jenkinsfile-build`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jenkins/Jenkinsfile-build) | `label 'flask-app-agent'` | Raw Docker Build & `docker run` | Plain Text via `emailext` | Container stop & rm |
-| [`Jenkinsfile-compose`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jenkins/Jenkinsfile-compose) | `label 'flask-app-agent'` | `docker compose pull`<br>`docker compose up -d --force-recreate` | Responsive HTML Email Template | `always { sh 'docker logout \|\| true' }` |
+| [`Jenkinsfile-build`](Jenkinsfile-build) | `label 'flask-app-agent'` | Raw Docker Build & `docker run` | Plain Text via `emailext` | Container stop & rm |
+| [`Jenkinsfile-compose`](Jenkinsfile-compose) | `label 'flask-app-agent'` | `docker compose pull`<br>`docker compose up -d --force-recreate` | Responsive HTML Email Template | `always { sh 'docker logout \|\| true' }` |
 
 ---
 
@@ -17,7 +17,7 @@ This module documents the production Jenkins declarative pipeline manifests used
 
 ### 1. Direct Build Pipeline (`Jenkinsfile-build`)
 
-The pipeline [`Jenkinsfile-build`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jenkins/Jenkinsfile-build) executes local image builds and single-container deployments:
+The pipeline [`Jenkinsfile-build`](Jenkinsfile-build) executes local image builds and single-container deployments:
 
 ```groovy
 pipeline {
@@ -103,7 +103,7 @@ Please check the Jenkins console logs for more details.
 
 ### 2. Docker Compose Production Pipeline (`Jenkinsfile-compose`)
 
-The pipeline [`Jenkinsfile-compose`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/jenkins/Jenkinsfile-compose) manages production deployments via Docker Compose with styled HTML email notifications:
+The pipeline [`Jenkinsfile-compose`](Jenkinsfile-compose) manages production deployments via Docker Compose with styled HTML email notifications:
 
 ```groovy
 pipeline {

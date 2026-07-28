@@ -8,11 +8,11 @@ This module provides the technical documentation for all containerization manife
 
 | File Name | Targeted Role | Key Configurations & Parameters |
 | --- | --- | --- |
-| [`Dockerfile`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/Dockerfile) | Single-Stage Developer Build | Base: `python:3.11-slim`<br>WORKDIR: `/app`<br>Exposes: `5000`<br>CMD: `["python", "app.py"]` |
-| [`Dockerfile-multi`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/Dockerfile-multi) | Multi-Stage Distroless Production Build | Stage 1: `python:3.9-slim as builder`<br>Stage 2: `gcr.io/distroless/python3-debian13`<br>ENV: `PYTHONPATH="/app/deps"` |
-| [`docker-compose.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/docker-compose.yml) | Standalone Application Compose | Service: `app`<br>Image: `kumar3472/snapdev:latest`<br>Container: `snapdev-app`<br>Ports: `5000:5000`<br>Restart: `unless-stopped` |
-| [`docker-compose-observability.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/docker-compose-observability.yml) | Full 6-Service Observability Stack | Services: `app`, `redis`, `cadvisor`, `node-exporter`, `prometheus`, `grafana`<br>Network: `snapnet`<br>Volumes: `prometheus_data`, `grafana-storage` |
-| [`prometheus.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/prometheus.yml) | Prometheus Scraping Specification | Global Scrape Interval: `15s`<br>Jobs: `prometheus` (`:9090`), `cAdvisor-docker` (`cadvisor:8080`), `NodeExporter` (`node-exporter:9100`) |
+| [`Dockerfile`](../Dockerfile) | Single-Stage Developer Build | Base: `python:3.11-slim`<br>WORKDIR: `/app`<br>Exposes: `5000`<br>CMD: `["python", "app.py"]` |
+| [`Dockerfile-multi`](../Dockerfile-multi) | Multi-Stage Distroless Production Build | Stage 1: `python:3.9-slim as builder`<br>Stage 2: `gcr.io/distroless/python3-debian13`<br>ENV: `PYTHONPATH="/app/deps"` |
+| [`docker-compose.yml`](../docker-compose.yml) | Standalone Application Compose | Service: `app`<br>Image: `kumar3472/snapdev:latest`<br>Container: `snapdev-app`<br>Ports: `5000:5000`<br>Restart: `unless-stopped` |
+| [`docker-compose-observability.yml`](../docker-compose-observability.yml) | Full 6-Service Observability Stack | Services: `app`, `redis`, `cadvisor`, `node-exporter`, `prometheus`, `grafana`<br>Network: `snapnet`<br>Volumes: `prometheus_data`, `grafana-storage` |
+| [`prometheus.yml`](../prometheus.yml) | Prometheus Scraping Specification | Global Scrape Interval: `15s`<br>Jobs: `prometheus` (`:9090`), `cAdvisor-docker` (`cadvisor:8080`), `NodeExporter` (`node-exporter:9100`) |
 
 ---
 
@@ -20,7 +20,7 @@ This module provides the technical documentation for all containerization manife
 
 ### 1. Standard Single-Stage Dockerfile (`Dockerfile`)
 
-The standard [`Dockerfile`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/Dockerfile) utilizes Docker's layer-caching optimization by copying `requirements.txt` independently prior to copying the application source code:
+The standard [`Dockerfile`](../Dockerfile) utilizes Docker's layer-caching optimization by copying `requirements.txt` independently prior to copying the application source code:
 
 ```dockerfile
 FROM python:3.11-slim
@@ -51,7 +51,7 @@ CMD ["python", "app.py"]
 
 ### 2. Optimized Distroless Multi-Stage Build (`Dockerfile-multi`)
 
-The multi-stage build [`Dockerfile-multi`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/Dockerfile-multi) leverages a build stage to compile dependencies and a minimal Google Distroless runtime image to eliminate OS attack vectors:
+The multi-stage build [`Dockerfile-multi`](../Dockerfile-multi) leverages a build stage to compile dependencies and a minimal Google Distroless runtime image to eliminate OS attack vectors:
 
 ```dockerfile
 FROM python:3.9-slim as builder
@@ -91,7 +91,7 @@ CMD ["app.py"]
 
 ### 1. Standalone Application Compose (`docker-compose.yml`)
 
-The standalone [`docker-compose.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/docker-compose.yml) manages container deployment declaratively:
+The standalone [`docker-compose.yml`](../docker-compose.yml) manages container deployment declaratively:
 
 ```yaml
 services:
@@ -113,7 +113,7 @@ services:
 
 ### 2. Full 6-Service Observability Stack (`docker-compose-observability.yml`)
 
-The production monitoring configuration [`docker-compose-observability.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/docker-compose-observability.yml) orchestrates 6 containers on custom bridge network `snapnet`:
+The production monitoring configuration [`docker-compose-observability.yml`](../docker-compose-observability.yml) orchestrates 6 containers on custom bridge network `snapnet`:
 
 ```yaml
 services:
@@ -218,7 +218,7 @@ volumes:
 
 ## Deep Dive: Prometheus Configuration (`prometheus.yml`)
 
-The Prometheus scraper configuration [`prometheus.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/prometheus.yml) defines timeseries collection intervals and endpoints:
+The Prometheus scraper configuration [`prometheus.yml`](../prometheus.yml) defines timeseries collection intervals and endpoints:
 
 ```yaml
 global:

@@ -8,10 +8,10 @@ This module documents the Kubernetes manifests and multi-node **Kind (Kubernetes
 
 | Manifest File | Kind / API Version | Kubernetes Resource | Key Configurations |
 | --- | --- | --- | --- |
-| [`config.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/config.yml) | `kind.x-k8s.io/v1alpha4` | `Cluster` | 3 Nodes (1 Control Plane, 2 Worker Nodes).<br>Port Mapping: `30080:30080`. |
-| [`namespace.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/namespace.yml) | `v1` | `Namespace` | Logical boundary: `snapdev-ns`. |
-| [`deployment.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/deployment.yml) | `apps/v1` | `Deployment` | Replicas: `5`.<br>Image: `kumar3472/snapdev:latest`.<br>Selector: `app: snapdev-label`. |
-| [`service.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/service.yml) | `v1` | `Service` (`NodePort`) | Cluster Port: `5000`.<br>Target Container Port: `5000`.<br>NodePort: `30080`. |
+| [`config.yml`](config.yml) | `kind.x-k8s.io/v1alpha4` | `Cluster` | 3 Nodes (1 Control Plane, 2 Worker Nodes).<br>Port Mapping: `30080:30080`. |
+| [`namespace.yml`](namespace.yml) | `v1` | `Namespace` | Logical boundary: `snapdev-ns`. |
+| [`deployment.yml`](deployment.yml) | `apps/v1` | `Deployment` | Replicas: `5`.<br>Image: `kumar3472/snapdev:latest`.<br>Selector: `app: snapdev-label`. |
+| [`service.yml`](service.yml) | `v1` | `Service` (`NodePort`) | Cluster Port: `5000`.<br>Target Container Port: `5000`.<br>NodePort: `30080`. |
 
 ---
 
@@ -19,7 +19,7 @@ This module documents the Kubernetes manifests and multi-node **Kind (Kubernetes
 
 ### 1. Kind Multi-Node Cluster Spec (`config.yml`)
 
-The manifest [`config.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/config.yml) provisions a multi-node Kubernetes cluster using Docker containers:
+The manifest [`config.yml`](config.yml) provisions a multi-node Kubernetes cluster using Docker containers:
 
 ```yaml
 kind: Cluster
@@ -45,7 +45,7 @@ nodes:
 
 ### 2. Namespace Manifest (`namespace.yml`)
 
-The manifest [`namespace.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/namespace.yml) creates an isolated tenant environment:
+The manifest [`namespace.yml`](namespace.yml) creates an isolated tenant environment:
 
 ```yaml
 apiVersion: v1
@@ -60,7 +60,7 @@ metadata:
 
 ### 3. Replicated Deployment Manifest (`deployment.yml`)
 
-The manifest [`deployment.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/deployment.yml) maintains high availability by running 5 pod replicas distributed across the 2 worker nodes:
+The manifest [`deployment.yml`](deployment.yml) maintains high availability by running 5 pod replicas distributed across the 2 worker nodes:
 
 ```yaml
 apiVersion: apps/v1
@@ -102,7 +102,7 @@ spec:
 
 ### 4. NodePort Ingress Service Manifest (`service.yml`)
 
-The manifest [`service.yml`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/k8s/service.yml) balances traffic across all 5 pods:
+The manifest [`service.yml`](service.yml) balances traffic across all 5 pods:
 
 ```yaml
 apiVersion: v1

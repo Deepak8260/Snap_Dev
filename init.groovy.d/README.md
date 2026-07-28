@@ -8,8 +8,8 @@ This module documents the automated Groovy post-initialization scripts executed 
 
 | Script Name | Target System API | Target Files / Inputs | Idempotency Check |
 | --- | --- | --- | --- |
-| [`create-pipeline-job.groovy`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/init.groovy.d/create-pipeline-job.groovy) | `org.jenkinsci.plugins.workflow.job.WorkflowJob`<br>`org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition` | `/var/lib/jenkins/bootstrap/Jenkinsfile-compose` | Skips if job `Snap-Dev` exists (`jenkins.getItem(jobName) != null`). |
-| [`ssh-credential.groovy`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/init.groovy.d/ssh-credential.groovy) | `com.cloudbees.plugins.credentials.SystemCredentialsProvider`<br>`com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey` | `/var/lib/jenkins/secrets/agent_key` | Skips if credential `agent-ssh-key` exists (`store.getCredentials(...).find`). |
+| [`create-pipeline-job.groovy`](create-pipeline-job.groovy) | `org.jenkinsci.plugins.workflow.job.WorkflowJob`<br>`org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition` | `/var/lib/jenkins/bootstrap/Jenkinsfile-compose` | Skips if job `Snap-Dev` exists (`jenkins.getItem(jobName) != null`). |
+| [`ssh-credential.groovy`](ssh-credential.groovy) | `com.cloudbees.plugins.credentials.SystemCredentialsProvider`<br>`com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey` | `/var/lib/jenkins/secrets/agent_key` | Skips if credential `agent-ssh-key` exists (`store.getCredentials(...).find`). |
 
 ---
 
@@ -47,7 +47,7 @@ This module documents the automated Groovy post-initialization scripts executed 
 
 ### 1. Job Creation Bootstrap (`create-pipeline-job.groovy`)
 
-The script [`create-pipeline-job.groovy`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/init.groovy.d/create-pipeline-job.groovy) programmatically registers the `Snap-Dev` declarative pipeline workflow:
+The script [`create-pipeline-job.groovy`](create-pipeline-job.groovy) programmatically registers the `Snap-Dev` declarative pipeline workflow:
 
 ```groovy
 import jenkins.model.*
@@ -101,7 +101,7 @@ println "Pipeline job '${jobName}' created successfully."
 
 ### 2. SSH Credential Registration (`ssh-credential.groovy`)
 
-The script [`ssh-credential.groovy`](file:///d:/Personal_Files/VS_Code_Check/Devops_Practice/Snap_Dev/init.groovy.d/ssh-credential.groovy) provisions the SSH private key required for Jenkins Master to authenticate with the remote Agent node over SSH:
+The script [`ssh-credential.groovy`](ssh-credential.groovy) provisions the SSH private key required for Jenkins Master to authenticate with the remote Agent node over SSH:
 
 ```groovy
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider
