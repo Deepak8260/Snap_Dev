@@ -1,41 +1,46 @@
-aws_region = "ap-south-1"
+#############################################
+# AWS & Infrastructure Configuration
+#############################################
+aws_region          = "us-east-1"
+project_name        = "SnapDev"
+environment         = "dev"
+instance_type       = "t3.medium"
+master_instance_name = "snapdev-jenkins-master"
+agent_instance_name  = "snapdev-jenkins-agent"
 
-project_name = "SnapDev"
+#############################################
+# Network & Security Configuration
+#############################################
+key_name        = "snapdev-key"
+public_key_path = "~/.ssh/id_rsa.pub"
+my_ip           = "0.0.0.0/0" # Change to YOUR_PUBLIC_IP/32 for enhanced security
 
-environment = "Development"
-
-instance_type = "t3.medium"
-
-master_instance_name = "SnapDev-Jenkins-Master"
-
-agent_instance_name = "SnapDev-Jenkins-Agent"
-
-key_name = "snapdev-key"
-
-public_key_path = "/path/to/id_ed25519.pub"
-
-my_ip = "YOUR_PUBLIC_IP/32"
-
+#############################################
+# Jenkins Admin & Credentials
+#############################################
 jenkins_admin_username = "admin"
+jenkins_admin_password = "YourAdminPassword123!"
 
-jenkins_admin_password = "CHANGE_ME"
-
-github_username = "YOUR_GITHUB_USERNAME"
-
-github_token = "YOUR_GITHUB_TOKEN"
+github_username    = "YOUR_GITHUB_USERNAME"
+github_token       = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 dockerhub_username = "YOUR_DOCKERHUB_USERNAME"
+dockerhub_password = "dckr_pat_xxxxxxxxxxxxxxxxxxxx"
 
-dockerhub_password = "YOUR_DOCKERHUB_PASSWORD"
-
-agent_ssh_private_key = "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
-
-controller_public_key = "ssh-rsa AAAA... your-controller-key"
-
-agent_name = "snapdev-agent"
-
-agent_labels = "docker,linux"
-
+#############################################
+# Jenkins Agent Node Configuration
+#############################################
+agent_name      = "flask-app-agent"
+agent_labels    = "flask-app-agent"
 agent_remote_fs = "/home/ubuntu/jenkins"
+agent_executors = 1
 
-agent_executors = 2
+#############################################
+# SMTP & Email Notification Configuration
+#############################################
+smtp_server   = "smtp.gmail.com"
+smtp_port     = "465"
+smtp_ssl      = true
+smtp_username = "your-email@gmail.com"
+smtp_password = "your-16-digit-app-password"
+admin_email   = "your-email@gmail.com"
