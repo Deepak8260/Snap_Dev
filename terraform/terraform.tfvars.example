@@ -38,4 +38,4 @@ agent_labels = "docker,linux"
 
 agent_remote_fs = "/home/ubuntu/jenkins"
 
-agent_executors = 2
+agent_executors = 1
