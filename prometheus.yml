@@ -31,3 +31,15 @@ scrape_configs:
         labels:
           app: "prometheus"
     scrape_native_histograms: true
+
+  - job_name: "cAdvisor-docker"
+    static_configs:
+      - targets: ["cadvisor:8080"]
+        labels:
+          app: "docker"
+
+  - job_name: "NodeExporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+        labels:
+          app: "node"

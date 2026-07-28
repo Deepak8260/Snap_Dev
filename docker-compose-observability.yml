@@ -77,8 +77,20 @@ services:
     networks:
       - snapnet
 
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    networks:
+      - snapnet
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
 networks:
   snapnet:
   
 volumes:
   prometheus_data: {}
+  grafana-storage: {}
